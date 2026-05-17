@@ -1,0 +1,44 @@
+[project]
+name = "hw-pulse"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "ksredkin",email = "ksredkin0968@gmail.com"}
+]
+requires-python = ">=3.14"
+dependencies = [
+    "psutil (>=7.2.2,<8.0.0)",
+    "httpx (>=0.28.1,<0.29.0)",
+    "dotenv (>=0.9.9,<0.10.0)"
+]
+
+[tool.poetry]
+package-mode = false
+
+[tool.mypy]
+python_version = 3.14
+ignore_missing_imports = true
+disallow_untyped_defs = true
+strict = true
+
+[tool.ruff]
+line-length = 88
+target-version = "py314"
+exclude = ["venv", "versions"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+ignore = ["E501"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[dependency-groups]
+dev = [
+    "mypy (>=2.1.0,<3.0.0)",
+    "ruff (>=0.15.13,<0.16.0)"
+]

@@ -1,0 +1,64 @@
+import psutil
+
+
+class SystemCollector:
+    def _get_cpu_metrics(self) -> dict[str, float]:
+        cpu_freq = psutil.cpu_freq()
+        return {
+            "percent": psutil.cpu_percent(interval=None),
+            "percent_per_core": psutil.cpu_percent(interval=None, percpu=True),
+            "cores": psutil.cpu_count(logical=False),
+            "cores_logical": psutil.cpu_count(logical=True),
+            "frequency": {
+                "current": cpu_freq.current if cpu_freq else 0,
+                "min": cpu_freq.min if cpu_freq else 0,
+                "max": cpu_freq.max if cpu_freq else 0,
+            },
+        }
+
+    def _get_memory_metrics(self) -> dict[str, dict[str, float]]:
+        mem = psutil.virtual_memory()
+        swap = psutil.swap_memory()
+        return {
+            "ram": {
+                "percent": mem.percent,
+                "total_gb": round(mem.total / (1024**3), 2),
+                "available_gb": round(mem.available / (1024**3), 2),
+            },
+            "swap": {"percent": swap.percent},
+        }
+
+    def _get_disk_metrics(self) -> dict[str, dict[str, float]]:
+        disk_info = {}
+        for partition in psutil.disk_partitions():
+            try:
+                usage = psutil.disk_usage(partition.mountpoint)
+                disk_info[partition.mountpoint] = {
+                    "total_gb": round(usage.total / (1024**3), 2),
+                    "free_gb": round(usage.free / (1024**3), 2),
+                    "usage_percent": usage.percent,
+                }
+            except PermissionError:
+                continue
+        return disk_info
+
+    def get_system_metrics(
+        self,
+    ) -> dict[
+        str,
+        dict[str, float | list[float] | dict[str, float]]
+        | dict[str, dict[str, float]]
+        | dict[str, float]
+        | dict[str, int],
+    ]:
+        net_io = psutil.net_io_counters()
+        return {
+            "cpu": self._get_cpu_metrics(),
+            "memory": self._get_memory_metrics(),
+            "disks": self._get_disk_metrics(),
+            "network": {
+                "read_mb": round(net_io.bytes_recv / (1024**2), 2),
+                "write_mb": round(net_io.bytes_sent / (1024**2), 2),
+            },
+            "processes": {"count": len(psutil.pids())},
+        }
