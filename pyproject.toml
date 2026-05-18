@@ -9,7 +9,10 @@ requires-python = ">=3.14"
 dependencies = [
     "psutil (>=7.2.2,<8.0.0)",
     "httpx (>=0.28.1,<0.29.0)",
-    "dotenv (>=0.9.9,<0.10.0)"
+    "dotenv (>=0.9.9,<0.10.0)",
+    "fastapi (>=0.136.1,<0.137.0)",
+    "uvicorn (>=0.47.0,<0.48.0)",
+    "redis (>=7.4.0,<8.0.0)"
 ]
 
 [tool.poetry]

@@ -249,3 +249,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+.env.api
+.env.daemon

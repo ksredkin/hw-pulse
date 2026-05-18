@@ -1,0 +1,48 @@
+services:
+  hw-redis:
+    image: redis:7
+    container_name: hw-redis
+    restart: always
+    networks:
+      - api-redis-network
+      - bot-redis-network
+
+  hw-api:
+    container_name: hw-api
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    ports:
+      - "${API_PORT}:${API_PORT}"
+    environment:
+      API_HOST: ${API_HOST}
+      API_PORT: ${API_PORT}
+      REDIS_HOST: hw-redis
+      REDIS_PORT: 6379
+    depends_on:
+      - hw-redis
+    env_file:
+      - .env.api
+    networks:
+      - api-redis-network
+
+  hw-bot:
+    container_name: hw-bot
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile.bot
+      REDIS_HOST: hw-redis
+      REDIS_PORT: 6379
+    depends_on:
+      - hw-redis
+      - hw-api
+    networks:
+      - bot-redis-network
+
+networks:
+  api-redis-network:
+    driver: bridge
+  bot-redis-network:
+    driver: bridge

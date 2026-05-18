@@ -1,0 +1,36 @@
+from redis.asyncio import Redis
+from src.api.utils.logger import Logger
+import json
+
+logger = Logger("Cache Serice")
+
+class CacheService:
+    def __init__(self, redis: Redis):
+        self.r = redis
+
+    async def _get(self, prefix: str, key: str) -> str | bool | None:
+        full_key = f"{prefix}:{key}"
+        data = await self.r.get(full_key)
+
+        if not data:
+            logger.info(f"Кэш не найден: {full_key}")
+            return None
+
+        logger.info(f"Кэш найден: {full_key}")
+        return data
+
+    async def _set(
+        self, prefix: str, key: str, value: str, expire: int | None = None
+    ) -> None:
+        full_key = f"{prefix}:{key}"
+        await self.r.set(full_key, value, ex=expire)
+        ttl_str = f" (истечет через {expire}с)" if expire else " (без лимита)"
+        logger.info(f"Данные сохранены в кэш: {full_key}{ttl_str}")
+
+    async def set_metrics(self, metrics: dict[str, dict[str, float | list[float] | dict[str, float]] | dict[str, dict[str, float]] | dict[str, float] | dict[str, int]]) -> None:
+        await self._set("system", "metrics", json.dumps(metrics))
+
+    async def get_commands(self) -> list:
+        return await self._get("system", "commands")
+
+cache = CacheService()
