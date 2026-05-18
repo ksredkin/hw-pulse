@@ -33,6 +33,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.bot
+    environment:
       REDIS_HOST: hw-redis
       REDIS_PORT: 6379
     depends_on:
