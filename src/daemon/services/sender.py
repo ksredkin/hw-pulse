@@ -1,6 +1,6 @@
 import httpx
 
-from src.daemon.utils.logger import Logger
+from src.common.utils.logger import Logger
 
 logger = Logger("MetricsSender")
 

@@ -2,8 +2,8 @@ import json
 
 from redis.asyncio import Redis
 
-from src.api.redis.client import r
-from src.api.utils.logger import Logger
+from src.common.redis.client import r
+from src.common.utils.logger import Logger
 
 logger = Logger("Cache Serice")
 
@@ -43,6 +43,18 @@ class CacheService:
     ) -> None:
         await self._set("system", "metrics", json.dumps(metrics))
 
+    async def get_metrics(
+        self,
+        metrics: dict[
+            str,
+            dict[str, float | list[float] | dict[str, float]]
+            | dict[str, dict[str, float]]
+            | dict[str, float]
+            | dict[str, int],
+        ],
+    ) -> None:
+        await self._get("system", "metrics")
+
     async def get_commands(self) -> list[str]:
         data = await self._get("system", "commands")
         if data is None or isinstance(data, bool):
@@ -52,6 +64,9 @@ class CacheService:
             return commands
         except Exception:
             return []
+
+    async def set_commands(self, commands: list[str]) -> None:
+        await self._set("system", "commands", json.dumps(commands))
 
 
 cache = CacheService(r)

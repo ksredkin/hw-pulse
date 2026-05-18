@@ -5,8 +5,8 @@ import uvicorn
 from fastapi import FastAPI
 
 from src.api.models.models import Metrics
-from src.api.services.cache import cache
-from src.api.utils.logger import Logger
+from src.common.services.cache import cache
+from src.common.utils.logger import Logger
 
 logger = Logger("Api")
 app = FastAPI()

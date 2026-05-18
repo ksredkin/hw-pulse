@@ -10,6 +10,7 @@ RUN poetry config virtualenvs.create false
 RUN poetry install --no-root --only main
 
 COPY src/bot /app/src/bot
+COPY src/common /app/src/common
 
 ENV PYTHONPATH=/app/src
 CMD ["python", "-m", "bot"]

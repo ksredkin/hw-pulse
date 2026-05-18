@@ -3,7 +3,7 @@ import sys
 
 from redis.asyncio import Redis
 
-from src.api.utils.logger import Logger
+from src.common.utils.logger import Logger
 
 logger = Logger("Redis Client")
 
