@@ -45,15 +45,29 @@ class CacheService:
 
     async def get_metrics(
         self,
-        metrics: dict[
-            str,
-            dict[str, float | list[float] | dict[str, float]]
-            | dict[str, dict[str, float]]
-            | dict[str, float]
-            | dict[str, int],
-        ],
-    ) -> None:
-        await self._get("system", "metrics")
+    ) -> dict[
+        str,
+        dict[str, float | list[float] | dict[str, float]]
+        | dict[str, dict[str, float]]
+        | dict[str, float]
+        | dict[str, int],
+    ]:
+        try:
+            metrics_json = await self._get("system", "metrics")
+
+            if not isinstance(metrics_json, str):
+                return {}
+
+            metrics: dict[
+                str,
+                dict[str, float | list[float] | dict[str, float]]
+                | dict[str, dict[str, float]]
+                | dict[str, float]
+                | dict[str, int],
+            ] = json.loads(metrics_json)
+            return metrics
+        except Exception:
+            return {}
 
     async def get_commands(self) -> list[str]:
         data = await self._get("system", "commands")

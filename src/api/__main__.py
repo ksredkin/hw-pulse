@@ -3,6 +3,7 @@ import sys
 
 import uvicorn
 from fastapi import FastAPI
+from fastapi.responses import JSONResponse
 
 from src.api.models.models import Metrics
 from src.common.services.cache import cache
@@ -13,12 +14,12 @@ app = FastAPI()
 
 
 @app.post("/")
-async def post_metrics(metrics: Metrics) -> list[str]:
+async def post_metrics(metrics: Metrics) -> JSONResponse:
     await cache.set_metrics(metrics.model_dump())
-    commands = await cache.get_commands()
-    logger.info(str(metrics))
-    logger.info(str(commands))
-    return commands if commands else []
+    commands = await cache.get_commands() or []
+    return JSONResponse(
+        {"status": "success", "data": {"commands": commands}}, status_code=200
+    )
 
 
 def main() -> None:

@@ -28,7 +28,13 @@ class MetricsSender:
                 return []
 
             response_json = response.json()
-            commands = response_json.get("commands", [])
+            data = response_json.get("data")
+
+            if not isinstance(data, dict):
+                logger.warning("Incorrect response data")
+                return []
+
+            commands = data.get("commands")
 
             if not isinstance(commands, list):
                 logger.warning('Expected "commands" to be a list')
