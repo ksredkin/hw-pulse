@@ -4,16 +4,16 @@ import time
 
 from dotenv import load_dotenv
 
+from src.common.utils.logger import Logger
 from src.daemon.services.collector import SystemCollector
 from src.daemon.services.sender import MetricsSender
-from src.daemon.utils.logger import Logger
 
 logger = Logger("Daemon")
 
 
 def main() -> None:
     load_dotenv()
-    api_host = os.getenv("API_HOST")
+    api_host = os.getenv("DAEMON_API_HOST")
 
     if not api_host:
         logger.error("API_HOST is not set in environment variables!")
