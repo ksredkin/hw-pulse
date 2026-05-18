@@ -1,7 +1,9 @@
-from redis.asyncio import Redis
 import os
-from src.api.utils.logger import Logger
 import sys
+
+from redis.asyncio import Redis
+
+from src.api.utils.logger import Logger
 
 logger = Logger("Redis Client")
 

@@ -1,8 +1,12 @@
-from redis.asyncio import Redis
-from src.api.utils.logger import Logger
 import json
 
+from redis.asyncio import Redis
+
+from src.api.redis.client import r
+from src.api.utils.logger import Logger
+
 logger = Logger("Cache Serice")
+
 
 class CacheService:
     def __init__(self, redis: Redis):
@@ -10,7 +14,7 @@ class CacheService:
 
     async def _get(self, prefix: str, key: str) -> str | bool | None:
         full_key = f"{prefix}:{key}"
-        data = await self.r.get(full_key)
+        data: str | bool | None = await self.r.get(full_key)
 
         if not data:
             logger.info(f"Кэш не найден: {full_key}")
@@ -27,10 +31,27 @@ class CacheService:
         ttl_str = f" (истечет через {expire}с)" if expire else " (без лимита)"
         logger.info(f"Данные сохранены в кэш: {full_key}{ttl_str}")
 
-    async def set_metrics(self, metrics: dict[str, dict[str, float | list[float] | dict[str, float]] | dict[str, dict[str, float]] | dict[str, float] | dict[str, int]]) -> None:
+    async def set_metrics(
+        self,
+        metrics: dict[
+            str,
+            dict[str, float | list[float] | dict[str, float]]
+            | dict[str, dict[str, float]]
+            | dict[str, float]
+            | dict[str, int],
+        ],
+    ) -> None:
         await self._set("system", "metrics", json.dumps(metrics))
 
-    async def get_commands(self) -> list:
-        return await self._get("system", "commands")
+    async def get_commands(self) -> list[str]:
+        data = await self._get("system", "commands")
+        if data is None or isinstance(data, bool):
+            return []
+        try:
+            commands: list[str] = json.loads(data)
+            return commands
+        except Exception:
+            return []
 
-cache = CacheService()
+
+cache = CacheService(r)

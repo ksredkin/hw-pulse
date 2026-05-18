@@ -1,11 +1,12 @@
-from fastapi import FastAPI
-from src.api.utils.logger import Logger
-import uvicorn
 import os
 import sys
+
+import uvicorn
+from fastapi import FastAPI
+
 from src.api.models.models import Metrics
 from src.api.services.cache import cache
-from dotenv import load_dotenv
+from src.api.utils.logger import Logger
 
 logger = Logger("Api")
 app = FastAPI()
@@ -13,10 +14,10 @@ app = FastAPI()
 
 @app.post("/")
 async def post_metrics(metrics: Metrics) -> list[str]:
-    await cache.set_metrics(metrics)
+    await cache.set_metrics(metrics.model_dump())
     commands = await cache.get_commands()
     logger.info(str(metrics))
-    logger.info(commands)
+    logger.info(str(commands))
     return commands if commands else []
 
 
@@ -29,6 +30,7 @@ def main() -> None:
         sys.exit(1)
 
     uvicorn.run(app, host=host, port=int(port))
+
 
 if __name__ == "__main__":
     main()
