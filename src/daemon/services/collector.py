@@ -1,3 +1,7 @@
+import json
+import platform
+import subprocess
+
 import psutil
 
 
@@ -14,6 +18,7 @@ class SystemCollector:
                 "min": cpu_freq.min if cpu_freq else 0,
                 "max": cpu_freq.max if cpu_freq else 0,
             },
+            "temperature": self._get_cpu_temperature(),
         }
 
     def _get_memory_metrics(self) -> dict[str, dict[str, float]]:
@@ -41,6 +46,42 @@ class SystemCollector:
             except PermissionError:
                 continue
         return disk_info
+
+    def _get_windows_cpu_temperature(self) -> float:
+        try:
+            command = 'powershell -Command "Get-CimInstance -Namespace root/wmi -ClassName MSAcpi_ThermalZoneTemperature | Select-Object CurrentTemperature | ConvertTo-Json"'
+            result = subprocess.run(
+                command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                shell=True,
+            )
+
+            if result.returncode == 0 and result.stdout.strip():
+                data = json.loads(result.stdout)
+                raw_temp = data.get("CurrentTemperature")
+                if raw_temp:
+                    return round((raw_temp / 10.0) - 273.15, 1)  # type: ignore
+        except Exception:
+            pass
+        return 0.0
+
+    def _get_cpu_temperature(self) -> float:
+        current_os = platform.system()
+
+        if current_os == "Linux":
+            temps = psutil.sensors_temperatures()
+            if "coretemp" in temps:
+                return round(temps["coretemp"][0].current, 1)  # type: ignore
+            elif temps:
+                first_key = list(temps.keys())[0]
+                return round(temps[first_key][0].current, 1)  # type: ignore
+
+        elif current_os == "Windows":
+            return self._get_windows_cpu_temperature()
+
+        return 0.0
 
     def get_system_metrics(
         self,

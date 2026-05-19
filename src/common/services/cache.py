@@ -82,5 +82,11 @@ class CacheService:
     async def set_commands(self, commands: list[str]) -> None:
         await self._set("system", "commands", json.dumps(commands))
 
+    async def get_image_id_from_cache(self, image: str) -> str | bool | None:
+        return await self._get("image", image)
+
+    async def set_image_id_in_cache(self, image: str, image_id: str) -> None:
+        await self._set("image", image, image_id)
+
 
 cache = CacheService(r)
