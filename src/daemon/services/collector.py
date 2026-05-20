@@ -1,6 +1,5 @@
-import json
+import httpx
 import platform
-import subprocess
 
 import psutil
 
@@ -47,25 +46,44 @@ class SystemCollector:
                 continue
         return disk_info
 
-    def _get_windows_cpu_temperature(self) -> float:
+    def _get_windows_cpu_temperature(self) -> float | None:
         try:
-            command = 'powershell -Command "Get-CimInstance -Namespace root/wmi -ClassName MSAcpi_ThermalZoneTemperature | Select-Object CurrentTemperature | ConvertTo-Json"'
-            result = subprocess.run(
-                command,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-                shell=True,
-            )
+            url = "http://127.0.0.1:8085/data.json"
+            
+            headers = {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                "Accept": "application/json",
+                "Connection": "close"
+            }
+            
+            response = httpx.get(url, headers=headers, timeout=5.0)            
+            response.raise_for_status()
+            
+            data = response.json()
 
-            if result.returncode == 0 and result.stdout.strip():
-                data = json.loads(result.stdout)
-                raw_temp = data.get("CurrentTemperature")
-                if raw_temp:
-                    return round((raw_temp / 10.0) - 273.15, 1)  # type: ignore
+            def find_cpu_temp(node: dict) -> float | None:
+                if node.get("Text") == "Temperatures":
+                    for child in node.get("Children", []):
+                        name = child.get("Text", "")
+                        if any(k in name for k in ("CPU Package", "Core Average", "Core (Tctl/Tdie)")):
+                            val_str = child.get("Value", "").replace(" °C", "").replace(",", ".")
+                            try:
+                                return float(val_str)
+                            except ValueError:
+                                pass
+                
+                for child in node.get("Children", []):
+                    result = find_cpu_temp(child)
+                    if result is not None:
+                        return result
+                return None
+
+            return find_cpu_temp(data)
+            
         except Exception:
             pass
-        return 0.0
+            
+        return None
 
     def _get_cpu_temperature(self) -> float:
         current_os = platform.system()
@@ -81,7 +99,7 @@ class SystemCollector:
         elif current_os == "Windows":
             return self._get_windows_cpu_temperature()
 
-        return 0.0
+        return None
 
     def get_system_metrics(
         self,

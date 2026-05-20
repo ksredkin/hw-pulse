@@ -22,7 +22,11 @@ from src.common.utils.logger import Logger
 
 logger = Logger("Bot __main__")
 
-bot_commands = [BotCommand(command="stats", description="📈 Состояние пк")]
+bot_commands = [
+    BotCommand(command="start", description="👋 Стартовое сообщение"),
+    BotCommand(command="stats", description="💻 Текущие показатели системы"),
+    BotCommand(command="temperature", description="🌡️ Текущая температура процессора"),
+    ]
 
 
 async def setup_bot(bot: Bot) -> None:

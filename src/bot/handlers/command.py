@@ -79,7 +79,7 @@ async def stats(message: Message, cache: CacheService) -> None:
         )
 
     if disks := metrics.get("disks"):
-        disk_text = "\n<b>💽 Диски:</b>\n"
+        disk_text = "\n\n<b>💽 Диски:</b>\n"
         for mount, info in disks.items():
             disk_text += (
                 f"📁 <code>{mount}</code>: {info.get('usage_percent', 'Н/Д')}% "  # type: ignore
