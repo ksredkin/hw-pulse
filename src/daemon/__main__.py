@@ -19,8 +19,14 @@ def main() -> None:
         logger.error("API_HOST is not set in environment variables!")
         sys.exit(1)
 
+    api_key = os.getenv("DAEMON_API_KEY")
+
+    if not api_key:
+        logger.error("API_KEY is not set in environment variables!")
+        sys.exit(1)
+
     collector = SystemCollector()
-    sender = MetricsSender(api_host=api_host)
+    sender = MetricsSender(api_host=api_host, api_key=api_key)
 
     logger.info("Daemon started successfully.")
 

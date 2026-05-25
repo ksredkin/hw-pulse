@@ -40,11 +40,12 @@ class CacheService:
             | dict[str, float]
             | dict[str, int],
         ],
+        telegram_id: int,
     ) -> None:
-        await self._set("system", "metrics", json.dumps(metrics))
+        await self._set(f"system:{telegram_id}", "metrics", json.dumps(metrics))
 
     async def get_metrics(
-        self,
+        self, telegram_id: int
     ) -> dict[
         str,
         dict[str, float | list[float] | dict[str, float]]
@@ -53,7 +54,7 @@ class CacheService:
         | dict[str, int],
     ]:
         try:
-            metrics_json = await self._get("system", "metrics")
+            metrics_json = await self._get(f"system:{telegram_id}", "metrics")
 
             if not isinstance(metrics_json, str):
                 return {}
@@ -69,8 +70,8 @@ class CacheService:
         except Exception:
             return {}
 
-    async def get_commands(self) -> list[str]:
-        data = await self._get("system", "commands")
+    async def get_commands(self, telegram_id: int) -> list[str]:
+        data = await self._get(f"system:{telegram_id}", "commands")
         if data is None or isinstance(data, bool):
             return []
         try:
@@ -79,14 +80,21 @@ class CacheService:
         except Exception:
             return []
 
-    async def set_commands(self, commands: list[str]) -> None:
-        await self._set("system", "commands", json.dumps(commands))
+    async def set_commands(self, commands: list[str], telegram_id: int) -> None:
+        await self._set(f"system:{telegram_id}", "commands", json.dumps(commands))
 
     async def get_image_id_from_cache(self, image: str) -> str | bool | None:
         return await self._get("image", image)
 
     async def set_image_id_in_cache(self, image: str, image_id: str) -> None:
         await self._set("image", image, image_id)
+
+    async def set_telegram_id_by_api_key(self, api_key: str, telegram_id: int) -> None:
+        await self._set("auth", api_key, str(telegram_id), 3600)
+
+    async def get_telegram_id_by_api_key(self, api_key: str) -> None | int:
+        result = await self._get("auth", api_key)
+        return int(result) if isinstance(result, str) else None
 
 
 cache = CacheService(r)

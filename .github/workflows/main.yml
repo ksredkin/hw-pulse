@@ -54,3 +54,4 @@ jobs:
           cd ~/hw-pulse
           git pull origin master
           docker compose up -d --build
+          docker compose exec hw-pulse-api poetry run alembic upgrade head

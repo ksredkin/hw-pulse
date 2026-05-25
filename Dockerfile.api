@@ -9,6 +9,9 @@ COPY pyproject.toml poetry.lock /app/
 RUN poetry config virtualenvs.create false
 RUN poetry install --no-root --only main
 
+COPY alembic.ini /app/alembic.ini
+COPY alembic /app/alembic
+
 COPY src/api /app/src/api
 COPY src/common /app/src/common
 

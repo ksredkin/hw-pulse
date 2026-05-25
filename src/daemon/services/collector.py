@@ -1,6 +1,6 @@
-import httpx
 import platform
 
+import httpx
 import psutil
 
 
@@ -49,29 +49,36 @@ class SystemCollector:
     def _get_windows_cpu_temperature(self) -> float | None:
         try:
             url = "http://127.0.0.1:8085/data.json"
-            
+
             headers = {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
                 "Accept": "application/json",
-                "Connection": "close"
+                "Connection": "close",
             }
-            
-            response = httpx.get(url, headers=headers, timeout=5.0)            
+
+            response = httpx.get(url, headers=headers, timeout=5.0)
             response.raise_for_status()
-            
+
             data = response.json()
 
-            def find_cpu_temp(node: dict) -> float | None:
+            def find_cpu_temp(node: dict) -> float | None:  # type: ignore
                 if node.get("Text") == "Temperatures":
                     for child in node.get("Children", []):
                         name = child.get("Text", "")
-                        if any(k in name for k in ("CPU Package", "Core Average", "Core (Tctl/Tdie)")):
-                            val_str = child.get("Value", "").replace(" °C", "").replace(",", ".")
+                        if any(
+                            k in name
+                            for k in ("CPU Package", "Core Average", "Core (Tctl/Tdie)")
+                        ):
+                            val_str = (
+                                child.get("Value", "")
+                                .replace(" °C", "")
+                                .replace(",", ".")
+                            )
                             try:
                                 return float(val_str)
                             except ValueError:
                                 pass
-                
+
                 for child in node.get("Children", []):
                     result = find_cpu_temp(child)
                     if result is not None:
@@ -79,13 +86,13 @@ class SystemCollector:
                 return None
 
             return find_cpu_temp(data)
-            
+
         except Exception:
             pass
-            
+
         return None
 
-    def _get_cpu_temperature(self) -> float:
+    def _get_cpu_temperature(self) -> float | None:
         current_os = platform.system()
 
         if current_os == "Linux":

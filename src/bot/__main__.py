@@ -17,6 +17,8 @@ from src.bot.core.config import (
 )
 from src.bot.handlers.command import command_router
 from src.bot.middlewares.cache import CacheMiddleware
+from src.bot.middlewares.db import DatabaseSessionMiddleware
+from src.common.database.connection import sessionmaker
 from src.common.services.cache import cache
 from src.common.utils.logger import Logger
 
@@ -26,7 +28,7 @@ bot_commands = [
     BotCommand(command="start", description="👋 Стартовое сообщение"),
     BotCommand(command="stats", description="💻 Текущие показатели системы"),
     BotCommand(command="temperature", description="🌡️ Текущая температура процессора"),
-    ]
+]
 
 
 async def setup_bot(bot: Bot) -> None:
@@ -95,8 +97,10 @@ async def main() -> None:
         await setup_bot(bot)
 
         dp = Dispatcher()
+        db_session_middleware = DatabaseSessionMiddleware(sessionmaker)
         cache_middleware = CacheMiddleware(cache)
 
+        dp.message.middleware(db_session_middleware)
         dp.message.middleware(cache_middleware)
 
         dp.include_router(command_router)

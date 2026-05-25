@@ -3,8 +3,25 @@ services:
     image: redis:7
     container_name: hw-pulse-redis
     restart: always
+    depends_on:
+      - hw-pulse-postgres
     networks:
       - hw-pulse-network
+
+  hw-pulse-postgres:
+    image: postgres:15-alpine
+    container_name: hw-pulse-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+        - hw-pulse-network
 
   hw-pulse-api:
     container_name: hw-pulse-api
@@ -23,6 +40,22 @@ services:
       - .env
     depends_on:
       - hw-pulse-redis
+    networks:
+      - hw-pulse-network
+
+  hw-pulse-migrations:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    environment:
+      DB_HOST: hw-pulse-postgres
+      DB_PORT: ${DB_PORT} 
+      DB_USER: ${DB_USER} 
+      DB_PASSWORD: ${DB_PASSWORD} 
+      DB_NAME: ${DB_NAME} 
+    command: poetry run alembic upgrade head
+    depends_on:
+      - hw-pulse-postgres
     networks:
       - hw-pulse-network
 
@@ -47,3 +80,7 @@ services:
 networks:
   hw-pulse-network:
     driver: bridge
+
+volumes:
+  postgres-data:
+    name: postgres-data

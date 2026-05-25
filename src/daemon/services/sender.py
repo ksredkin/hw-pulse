@@ -6,8 +6,9 @@ logger = Logger("MetricsSender")
 
 
 class MetricsSender:
-    def __init__(self, api_host: str):
+    def __init__(self, api_host: str, api_key: str):
         self.api_host = api_host
+        self.api_key = api_key
         self.client = httpx.Client()
 
     def send(
@@ -21,7 +22,11 @@ class MetricsSender:
         ],
     ) -> list[str]:
         try:
-            response = self.client.post(self.api_host, json=metrics_data)
+            headers = {"X-API-Key": self.api_key, "Content-Type": "application/json"}
+
+            response = self.client.post(
+                self.api_host, json=metrics_data, headers=headers
+            )
 
             if response.status_code != 200:
                 logger.warning(f"Server returned status code {response.status_code}")

@@ -1,9 +1,12 @@
 from aiogram import Router
 from aiogram.filters import Command, CommandStart
 from aiogram.types import FSInputFile, Message
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.bot.core.config import BOT_PHOTO_PATH
 from src.bot.messages.messages import start_message
+from src.bot.services.user import UserService
+from src.common.repositories.user_repository import UserRepository
 from src.common.services.cache import CacheService
 
 command_router = Router()
@@ -33,9 +36,40 @@ async def start(message: Message, cache: CacheService) -> None:
         await message.answer(start_message)
 
 
+@command_router.message(
+    Command("connect"), flags={"need_cache": True, "need_db_session": True}
+)
+async def connect(
+    message: Message, cache: CacheService, db_session: AsyncSession
+) -> None:
+    if not message or not message.from_user:
+        return
+
+    repository = UserRepository(db_session)
+
+    existing_user = await repository.get_by_tg_id(message.from_user.id)
+    if not existing_user:
+        service = UserService(repository)
+        new_user = await service.create_user(message.from_user.id)
+
+        if new_user is None:
+            await message.answer(
+                "<b>🚫 Ошибка:</b> не удалось создать нового пользователя. Попробуйте позже."
+            )
+            return
+
+        await cache.set_telegram_id_by_api_key(new_user.api_key, new_user.telegram_id)  # type: ignore
+        await message.answer(f"<b>🔑 Ваш ключ:</b> {new_user.api_key}")
+    else:
+        await message.answer(f"<b>🔑 Ваш ключ:</b> {existing_user.api_key}")
+
+
 @command_router.message(Command("stats"), flags={"need_cache": True})
 async def stats(message: Message, cache: CacheService) -> None:
-    metrics = await cache.get_metrics()
+    if not message or not message.from_user:
+        return
+
+    metrics = await cache.get_metrics(message.from_user.id)
 
     if not metrics:
         await message.answer(
@@ -104,7 +138,10 @@ async def stats(message: Message, cache: CacheService) -> None:
 
 @command_router.message(Command("temperature"), flags={"need_cache": True})
 async def temperature(message: Message, cache: CacheService) -> None:
-    metrics = await cache.get_metrics()
+    if not message or not message.from_user:
+        return
+
+    metrics = await cache.get_metrics(message.from_user.id)
 
     if not metrics:
         await message.answer(
@@ -129,6 +166,6 @@ async def temperature(message: Message, cache: CacheService) -> None:
     await message.answer(f"🌡️ Температура процессора: {temperature}℃")
 
 
-# commands = await cache.get_commands()
+# commands = await cache.get_commands(message.from_user.id)
 # await cache.set_commands([*commands, "kukareku"])
 # await message.answer("🐓 Kukareku")

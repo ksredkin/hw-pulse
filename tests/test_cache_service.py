@@ -16,12 +16,14 @@ async def test_set_and_get_commands(redis: FakeRedis) -> None:
     cache = CacheService(redis)
     commands = ["start", "stop", "status"]
 
-    await cache.set_commands(commands)
+    test_telegram_id = 12345
 
-    stored = await redis.get("system:commands")
+    await cache.set_commands(commands, test_telegram_id)
+
+    stored = await redis.get(f"system:{test_telegram_id}:commands")
     assert stored == json.dumps(commands)
 
-    loaded = await cache.get_commands()
+    loaded = await cache.get_commands(test_telegram_id)
     assert loaded == commands
 
 
@@ -29,7 +31,9 @@ async def test_set_and_get_commands(redis: FakeRedis) -> None:
 async def test_get_commands_returns_empty_if_key_missing(redis: FakeRedis) -> None:
     cache = CacheService(redis)
 
-    loaded = await cache.get_commands()
+    test_telegram_id = 12345
+
+    loaded = await cache.get_commands(test_telegram_id)
     assert loaded == []
 
 
@@ -41,12 +45,14 @@ async def test_set_and_get_metrics(redis: FakeRedis) -> None:
         "mem": {"total": 1024, "used": 512},
     }
 
-    await cache.set_metrics(metrics)  # type: ignore
+    test_telegram_id = 12345
 
-    stored = await redis.get("system:metrics")
+    await cache.set_metrics(metrics, test_telegram_id)  # type: ignore
+
+    stored = await redis.get(f"system:{test_telegram_id}:metrics")
     assert stored == json.dumps(metrics)
 
-    loaded = await cache.get_metrics()
+    loaded = await cache.get_metrics(test_telegram_id)
     assert loaded == metrics
 
 
@@ -54,7 +60,9 @@ async def test_set_and_get_metrics(redis: FakeRedis) -> None:
 async def test_get_metrics_returns_empty_if_key_missing(redis: FakeRedis) -> None:
     cache = CacheService(redis)
 
-    loaded = await cache.get_metrics()
+    test_telegram_id = 12345
+
+    loaded = await cache.get_metrics(test_telegram_id)
     assert loaded == {}
 
 
@@ -79,3 +87,18 @@ async def test_get_image_id_returns_none_if_missing(redis: FakeRedis) -> None:
 
     loaded = await cache.get_image_id_from_cache("nonexistent:image")
     assert loaded is None
+
+
+@pytest.mark.asyncio
+async def test_set_and_get_telegram_id_by_api_key(redis: FakeRedis) -> None:
+    cache = CacheService(redis)
+
+    telegram_id = 12345
+    api_key = "ABCDE-22-05-2026"
+
+    none_result = await cache.get_telegram_id_by_api_key(api_key)
+    assert none_result is None
+
+    await cache.set_telegram_id_by_api_key(api_key, telegram_id)
+    normal_result = await cache.get_telegram_id_by_api_key(api_key)
+    assert normal_result == telegram_id
