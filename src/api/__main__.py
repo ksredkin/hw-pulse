@@ -22,15 +22,15 @@ async def get_current_user_tg_id(api_key: str = Security(api_key_header)) -> int
     if cached_tg_id:
         return int(cached_tg_id)
 
-    session = await get_db_session()  # type: ignore
-    repository = UserRepository(session)
-    user = await repository.get_by_api_key(api_key)
+    async with get_db_session() as session:  # type: ignore
+        repository = UserRepository(session)
+        user = await repository.get_by_api_key(api_key)
 
-    if not user:
-        raise HTTPException(status_code=401, detail="Invalid API Key")
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid API Key")
 
-    cache.set_telegram_id_by_api_key(api_key, user.telegram_id)  # type: ignore
-    return user.telegram_id  # type: ignore
+        cache.set_telegram_id_by_api_key(api_key, user.telegram_id)  # type: ignore
+        return user.telegram_id  # type: ignore
 
 
 @app.post("/")
