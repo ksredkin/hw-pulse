@@ -49,7 +49,7 @@ jobs:
         port: ${{ secrets.PORT }}
         username: ${{ secrets.USER }}
         password: ${{ secrets.PASSWORD }}
-        command_timeout: 20m
+        command_timeout: 60m
         script: |
           cd ~/hw-pulse
           git pull origin master
