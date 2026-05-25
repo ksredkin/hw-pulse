@@ -20,7 +20,7 @@ class CacheMiddleware(BaseMiddleware):
         need_cache = get_flag(data, "need_cache")
 
         if not need_cache:
-            await handler(event, data)
+            return await handler(event, data)
 
         data["cache"] = self.cache
         await handler(event, data)

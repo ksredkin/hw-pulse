@@ -19,7 +19,7 @@ class DatabaseSessionMiddleware(BaseMiddleware):
         need_db_session = get_flag(data, "need_db_session")
 
         if not need_db_session:
-            await handler(event, data)
+            return await handler(event, data)
 
         async with self.sessionmaker() as session:
             data["db_session"] = session

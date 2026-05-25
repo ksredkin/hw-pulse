@@ -11,6 +11,7 @@ class UserRepository:
     async def create(self, telegram_id: int, api_key: str) -> User:
         user = User(telegram_id=telegram_id, api_key=api_key)
         self.session.add(user)
+        await self.session.flush()
         await self.session.refresh(user)
         return user
 
