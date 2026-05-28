@@ -23,7 +23,7 @@ async def get_current_user_tg_id(api_key: str = Security(api_key_header)) -> int
     if cached_tg_id:
         return int(cached_tg_id)
 
-    async with get_db_session() as session:  # type: ignore
+    async with get_db_session() as session:
         repository = UserRepository(session)
         user = await repository.get_by_api_key(api_key)
 

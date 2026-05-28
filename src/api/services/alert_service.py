@@ -15,7 +15,7 @@ class AlertService:
         settings = await cache.get_user_settings(telegram_id)
 
         if not settings:
-            async with get_db_session() as session:  # type: ignore
+            async with get_db_session() as session:
                 repository = UserRepository(session)
                 user = await repository.get_by_tg_id(telegram_id)
 
