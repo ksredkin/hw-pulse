@@ -102,3 +102,35 @@ async def test_set_and_get_telegram_id_by_api_key(redis: FakeRedis) -> None:
     await cache.set_telegram_id_by_api_key(api_key, telegram_id)
     normal_result = await cache.get_telegram_id_by_api_key(api_key)
     assert normal_result == telegram_id
+
+
+@pytest.mark.asyncio
+async def test_get_and_set_alert_lock(redis: FakeRedis) -> None:
+    cache = CacheService(redis)
+
+    telegram_id = 12345
+    ttl = 600
+
+    none_result = await cache.get_alert_lock(telegram_id)
+    assert none_result is None
+
+    await cache.set_alert_lock(telegram_id, ttl)
+
+    result = await cache.get_alert_lock(telegram_id)
+    assert result == "1"
+
+
+@pytest.mark.asyncio
+async def test_get_and_set_user_settings(redis: FakeRedis) -> None:
+    cache = CacheService(redis)
+
+    telegram_id = 12345
+    settings = {"alert_enabled": True, "alert_temp": 80}
+
+    none_result = await cache.get_user_settings(telegram_id)
+    assert none_result is None
+
+    await cache.set_user_settings(telegram_id, settings)
+
+    result = await cache.get_user_settings(telegram_id)
+    assert result == settings

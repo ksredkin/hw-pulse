@@ -4,6 +4,7 @@ from aiogram.types import FSInputFile, Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.bot.core.config import BOT_PHOTO_PATH
+from src.bot.keyboard.inline import create_inline_keyboard
 from src.bot.messages.messages import start_message
 from src.bot.services.user import UserService
 from src.common.repositories.user_repository import UserRepository
@@ -59,9 +60,11 @@ async def connect(
             return
 
         await cache.set_telegram_id_by_api_key(new_user.api_key, new_user.telegram_id)  # type: ignore
-        await message.answer(f"<b>🔑 Ваш ключ:</b> {new_user.api_key}")
+        await message.answer(f"<b>🔑 Ваш ключ:</b> <code>{new_user.api_key}</code>")
     else:
-        await message.answer(f"<b>🔑 Ваш ключ:</b> {existing_user.api_key}")
+        await message.answer(
+            f"<b>🔑 Ваш ключ:</b> <code>{existing_user.api_key}</code>"
+        )
 
 
 @command_router.message(Command("stats"), flags={"need_cache": True})
@@ -164,6 +167,48 @@ async def temperature(message: Message, cache: CacheService) -> None:
         return
 
     await message.answer(f"🌡️ Температура процессора: {temperature}℃")
+
+
+@command_router.message(
+    Command("settings"), flags={"need_cache": True, "need_db_session": True}
+)
+async def settings(
+    message: Message, cache: CacheService, db_session: AsyncSession
+) -> None:
+    if not message or not message.from_user:
+        return
+
+    user_settings = await cache.get_user_settings(message.from_user.id)
+
+    if not user_settings:
+        repository = UserRepository(db_session)
+        user = await repository.get_by_tg_id(message.from_user.id)
+
+        if not user:
+            await message.answer(
+                "<b>🚫 Ошибка:</b> Вы еще не подключили устройство. Используйте команду /connect для подключения."
+            )
+            return
+
+        user_settings = {
+            "alert_enabled": bool(user.alert_enabled),
+            "alert_temp": int(user.alert_temp),
+        }
+
+        await cache.set_user_settings(message.from_user.id, user_settings)
+
+    if user_settings["alert_enabled"]:
+        buttons = {
+            "🔔 Уведомления о перегреве включены": "switch_overheat_alert_enabled",
+            f"🌡️ Изменить порог уведомления о перегреве ({user_settings['alert_temp']}°C)": "change_overheat_alert_temp",
+        }
+    else:
+        buttons = {
+            "🔕 Уведомления о перегреве выключены": "switch_overheat_alert_enabled"
+        }
+
+    keyboard = create_inline_keyboard(buttons)
+    await message.answer("<b>⚙️ Настройки Hardware Pulse</b>", reply_markup=keyboard)
 
 
 # commands = await cache.get_commands(message.from_user.id)

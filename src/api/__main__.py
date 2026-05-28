@@ -2,11 +2,12 @@ import os
 import sys
 
 import uvicorn
-from fastapi import Depends, FastAPI, HTTPException, Security
+from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Security
 from fastapi.responses import JSONResponse
 from fastapi.security.api_key import APIKeyHeader
 
-from src.api.models.models import Metrics
+from src.api.schemas.metrics import Metrics
+from src.api.services.alert_service import AlertService
 from src.common.database.connection import get_db_session
 from src.common.repositories.user_repository import UserRepository
 from src.common.services.cache import cache
@@ -35,10 +36,17 @@ async def get_current_user_tg_id(api_key: str = Security(api_key_header)) -> int
 
 @app.post("/")
 async def post_metrics(
-    metrics: Metrics, telegram_id: int = Depends(get_current_user_tg_id)
+    metrics: Metrics,
+    background_tasks: BackgroundTasks,
+    telegram_id: int = Depends(get_current_user_tg_id),
 ) -> JSONResponse:
     await cache.set_metrics(metrics.model_dump(), telegram_id)
     commands = await cache.get_commands(telegram_id) or []
+    background_tasks.add_task(
+        AlertService.check_and_publish,
+        telegram_id,
+        metrics.cpu["temperature"],  # type: ignore
+    )
     return JSONResponse(
         {"status": "success", "data": {"commands": commands}}, status_code=200
     )

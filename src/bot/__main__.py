@@ -15,9 +15,11 @@ from src.bot.core.config import (
     BOT_PHOTO_PATH,
     BOT_PROFILE_DESCRIPTION,
 )
+from src.bot.handlers.callback import callback_router
 from src.bot.handlers.command import command_router
 from src.bot.middlewares.cache import CacheMiddleware
 from src.bot.middlewares.db import DatabaseSessionMiddleware
+from src.bot.tasks.pubsub_listener import listen_for_alerts
 from src.common.database.connection import sessionmaker
 from src.common.services.cache import cache
 from src.common.utils.logger import Logger
@@ -26,9 +28,10 @@ logger = Logger("Bot __main__")
 
 bot_commands = [
     BotCommand(command="start", description="👋 Стартовое сообщение"),
-    BotCommand(command="stats", description="💻 Текущие показатели системы"),
+    BotCommand(command="stats", description="📊 Текущие показатели системы"),
     BotCommand(command="temperature", description="🌡️ Текущая температура процессора"),
-    BotCommand(command="connect", description="🖥️ Подключить устройство"),
+    BotCommand(command="connect", description="💻 Подключить устройство"),
+    BotCommand(command="settings", description="⚙️ Настройки"),
 ]
 
 
@@ -105,6 +108,9 @@ async def main() -> None:
         dp.message.middleware(cache_middleware)
 
         dp.include_router(command_router)
+        dp.include_router(callback_router)
+
+        asyncio.create_task(listen_for_alerts(bot))
 
         await dp.start_polling(bot)
     except Exception as e:

@@ -96,5 +96,20 @@ class CacheService:
         result = await self._get("auth", api_key)
         return int(result) if isinstance(result, str) else None
 
+    async def set_alert_lock(self, telegram_id: int, ttl: int) -> None:
+        await self._set("lock:alert", str(telegram_id), "1", ttl)
+
+    async def get_alert_lock(self, telegram_id: int) -> str | bool | None:
+        return await self._get("lock:alert", str(telegram_id))
+
+    async def get_user_settings(self, telegram_id: int) -> dict[str, int | bool] | None:
+        result = await self._get("settings", str(telegram_id))
+        return json.loads(str(result)) if result else None
+
+    async def set_user_settings(
+        self, telegram_id: int, settings: dict[str, int | bool]
+    ) -> None:
+        await self._set("settings", str(telegram_id), json.dumps(settings), 3600)
+
 
 cache = CacheService(r)
