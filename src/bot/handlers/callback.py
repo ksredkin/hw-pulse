@@ -34,6 +34,12 @@ async def switch_overheat_alert_enabled(
 
     if current_settings:
         current_alert_enabled = current_settings["alert_enabled"]
+        new_alert_enabled = not current_alert_enabled
+
+        new_user_settings = {
+            "alert_enabled": new_alert_enabled,
+            "alert_temp": current_settings["alert_temp"],
+        }
     else:
         user = await repository.get_by_tg_id(callback.from_user.id)
 
@@ -44,11 +50,17 @@ async def switch_overheat_alert_enabled(
             return
 
         current_alert_enabled = user.alert_enabled  # type: ignore
+        new_alert_enabled = not current_alert_enabled
 
-    new_alert_enabled = not current_alert_enabled
+        new_user_settings = {
+            "alert_enabled": new_alert_enabled,
+            "alert_temp": int(user.alert_temp),
+        }
+
     await repository.update_settings_by_tg_id(
         callback.from_user.id, alert_enabled=new_alert_enabled
     )
+    await cache.set_user_settings(callback.from_user.id, new_user_settings)
 
     if new_alert_enabled:
         buttons = {
