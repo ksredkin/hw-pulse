@@ -13,7 +13,7 @@ def create_inline_keyboard(
 
 
 def create_cancell_inline_keyboard(
-    buttons: dict[str, str] = [],  # type: ignore
+    buttons: dict[str, str] = {},
     adjust: list[int] = [1],
     repeat: bool = True,
 ) -> InlineKeyboardMarkup:
