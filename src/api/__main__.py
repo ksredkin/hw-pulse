@@ -42,6 +42,7 @@ async def post_metrics(
 ) -> JSONResponse:
     await cache.set_metrics(metrics.model_dump(), telegram_id)
     commands = await cache.get_commands(telegram_id) or []
+    await cache.clear_commands(telegram_id)
     background_tasks.add_task(
         AlertService.check_and_publish,
         telegram_id,

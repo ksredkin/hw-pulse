@@ -31,6 +31,10 @@ class CacheService:
         ttl_str = f" (истечет через {expire}с)" if expire else " (без лимита)"
         logger.info(f"Данные сохранены в кэш: {full_key}{ttl_str}")
 
+    async def _del(self, prefix: str, key: str) -> None:
+        full_key = f"{prefix}:{key}"
+        await self.r.delete(full_key)
+
     async def set_metrics(
         self,
         metrics: dict[
@@ -82,6 +86,9 @@ class CacheService:
 
     async def set_commands(self, commands: list[str], telegram_id: int) -> None:
         await self._set(f"system:{telegram_id}", "commands", json.dumps(commands))
+
+    async def clear_commands(self, telegram_id: int) -> None:
+        await self._del(f"system:{telegram_id}", "commands")
 
     async def get_image_id_from_cache(self, image: str) -> str | bool | None:
         return await self._get("image", image)

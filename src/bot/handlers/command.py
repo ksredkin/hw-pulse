@@ -211,6 +211,13 @@ async def settings(
     await message.answer("<b>⚙️ Настройки Hardware Pulse</b>", reply_markup=keyboard)
 
 
-# commands = await cache.get_commands(message.from_user.id)
-# await cache.set_commands([*commands, "kukareku"])
-# await message.answer("🐓 Kukareku")
+@command_router.message(Command("shutdown"), flags={"need_cache": True})
+async def shutdown(message: Message, cache: CacheService) -> None:
+    if not message or not message.from_user:
+        return
+
+    commands = await cache.get_commands(message.from_user.id) or []
+    await cache.set_commands([*commands, "shutdown"], message.from_user.id)
+    await message.answer(
+        "⏳ Команда на выключение успешно отправлена! Устройство завершит работу через пару минут."
+    )

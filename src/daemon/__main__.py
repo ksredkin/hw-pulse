@@ -1,4 +1,6 @@
 import os
+import platform
+import subprocess
 import sys
 import time
 
@@ -36,12 +38,19 @@ def main() -> None:
             commands = sender.send(metrics)
 
             for command in commands:
-                if command == "kukareky":
-                    print("Kukareky! 🐓")
+                if command == "shutdown":
+                    print("Shutting down... ")
+                    current_os = platform.system()
+                    if current_os == "Windows":
+                        subprocess.run(["shutdown", "/s", "/t", "5"])
+                    else:
+                        subprocess.run(["sudo", "shutdown", "-h", "now"])
+
+                    sys.exit(0)
 
             time.sleep(3)
     except KeyboardInterrupt:
-        logger.info("Shutting down...")
+        logger.info("Daemon is shutting down...")
     finally:
         sender.close()
         sys.exit(0)

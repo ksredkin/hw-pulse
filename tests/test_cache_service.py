@@ -121,7 +121,7 @@ async def test_get_and_set_alert_lock(redis: FakeRedis) -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_and_set_user_settings(redis: FakeRedis) -> None:
+async def test_clear_user_commands(redis: FakeRedis) -> None:
     cache = CacheService(redis)
 
     telegram_id = 12345
@@ -134,3 +134,24 @@ async def test_get_and_set_user_settings(redis: FakeRedis) -> None:
 
     result = await cache.get_user_settings(telegram_id)
     assert result == settings
+
+
+@pytest.mark.asyncio
+async def test_get_and_set_user_settings(redis: FakeRedis) -> None:
+    cache = CacheService(redis)
+
+    telegram_id = 12345
+    commands = ["shutdown", "kukareky"]
+
+    empty_result = await cache.get_commands(telegram_id)
+    assert empty_result == []
+
+    await cache.set_commands(commands, telegram_id)
+
+    result = await cache.get_commands(telegram_id)
+    assert result == commands
+
+    await cache.clear_commands(telegram_id)
+
+    new_empty_result = await cache.get_commands(telegram_id)
+    assert new_empty_result == []
