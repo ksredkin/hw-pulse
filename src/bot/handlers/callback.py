@@ -30,11 +30,11 @@ async def switch_overheat_alert_enabled(
         return
 
     current_settings = await cache.get_user_settings(callback.from_user.id)
+    repository = UserRepository(db_session)
 
     if current_settings:
         current_alert_enabled = current_settings["alert_enabled"]
     else:
-        repository = UserRepository(db_session)
         user = await repository.get_by_tg_id(callback.from_user.id)
 
         if user is None:
