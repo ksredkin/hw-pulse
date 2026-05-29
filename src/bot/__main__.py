@@ -17,13 +17,13 @@ from src.bot.core.config import (
 )
 from src.bot.handlers.callback import callback_router
 from src.bot.handlers.command import command_router
+from src.bot.handlers.message import message_router
 from src.bot.middlewares.cache import CacheMiddleware
 from src.bot.middlewares.db import DatabaseSessionMiddleware
 from src.bot.tasks.pubsub_listener import listen_for_alerts
 from src.common.database.connection import sessionmaker
 from src.common.services.cache import cache
 from src.common.utils.logger import Logger
-from src.bot.handlers.message import message_router
 
 logger = Logger("Bot __main__")
 
@@ -107,6 +107,9 @@ async def main() -> None:
 
         dp.message.middleware(db_session_middleware)
         dp.message.middleware(cache_middleware)
+
+        dp.callback_query.middleware(db_session_middleware)
+        dp.callback_query.middleware(cache_middleware)
 
         dp.include_router(command_router)
         dp.include_router(callback_router)
