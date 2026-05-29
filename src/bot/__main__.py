@@ -23,6 +23,7 @@ from src.bot.tasks.pubsub_listener import listen_for_alerts
 from src.common.database.connection import sessionmaker
 from src.common.services.cache import cache
 from src.common.utils.logger import Logger
+from src.bot.handlers.message import message_router
 
 logger = Logger("Bot __main__")
 
@@ -109,6 +110,7 @@ async def main() -> None:
 
         dp.include_router(command_router)
         dp.include_router(callback_router)
+        dp.include_router(message_router)
 
         asyncio.create_task(listen_for_alerts(bot))
 
