@@ -31,7 +31,10 @@ bot_commands = [
     BotCommand(command="start", description="👋 Стартовое сообщение"),
     BotCommand(command="stats", description="📊 Текущие показатели системы"),
     BotCommand(command="temperature", description="🌡️ Текущая температура процессора"),
-    BotCommand(command="shutdown", description="🔌 Выключить устройство"),
+    BotCommand(command="shutdown", description="🛑 Выключить компьютер"),
+    BotCommand(command="restart", description="🔄 Перезагрузить компьютер"),
+    BotCommand(command="sleep", description="🌙 Перевести в спящий режим"),
+    BotCommand(command="ping", description="📡 Проверить статус ПК"),
     BotCommand(command="connect", description="💻 Подключить устройство"),
     BotCommand(command="settings", description="⚙️ Настройки"),
 ]

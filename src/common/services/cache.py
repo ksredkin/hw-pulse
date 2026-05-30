@@ -1,4 +1,5 @@
 import json
+from datetime import datetime, timezone
 
 from redis.asyncio import Redis
 
@@ -117,6 +118,14 @@ class CacheService:
         self, telegram_id: int, settings: dict[str, int | bool]
     ) -> None:
         await self._set("settings", str(telegram_id), json.dumps(settings), 3600)
+
+    async def update_system_last_seen(self, telegram_id: int) -> None:
+        now = datetime.now(timezone.utc)
+        await self._set(f"system:{telegram_id}", "last_seen", now.isoformat())
+
+    async def get_system_last_seen(self, telegram_id: int) -> datetime | None:
+        result = await self._get(f"system:{telegram_id}", "last_seen")
+        return datetime.fromisoformat(result) if isinstance(result, str) else None
 
 
 cache = CacheService(r)

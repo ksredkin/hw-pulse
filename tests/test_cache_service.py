@@ -4,9 +4,11 @@ os.environ["REDIS_HOST"] = "localhost"
 os.environ["REDIS_PORT"] = "6379"
 
 import json
+from datetime import datetime, timezone
 
 import pytest
 from fakeredis.aioredis import FakeRedis
+from freezegun import freeze_time
 
 from src.common.services.cache import CacheService
 
@@ -155,3 +157,20 @@ async def test_get_and_set_user_settings(redis: FakeRedis) -> None:
 
     new_empty_result = await cache.get_commands(telegram_id)
     assert new_empty_result == []
+
+
+@pytest.mark.asyncio
+@freeze_time("2025-01-01 00:00:00")
+async def test_update_and_get_system_last_seen(redis: FakeRedis) -> None:
+    fake_date = datetime(2025, 1, 1, tzinfo=timezone.utc)
+
+    cache = CacheService(redis)
+    telegram_id = 12345
+
+    none_result = await cache.get_system_last_seen(telegram_id)
+    assert none_result is None
+
+    await cache.update_system_last_seen(telegram_id)
+
+    result = await cache.get_system_last_seen(telegram_id)
+    assert result == fake_date

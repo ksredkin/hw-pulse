@@ -47,6 +47,22 @@ def main() -> None:
                         subprocess.run(["sudo", "shutdown", "-h", "now"])
 
                     sys.exit(0)
+                elif command == "restart":
+                    print("Restarting... ")
+                    if current_os == "Windows":
+                        subprocess.run(["shutdown", "/r", "/t", "5"])
+                    else:
+                        subprocess.run(["sudo", "shutdown", "-r", "now"])
+
+                    sys.exit(0)
+                elif command == "sleep":
+                    print("Going to bed... ")
+                    if current_os == "Windows":
+                        subprocess.run(
+                            ["rundll32.exe", "powrprof.dll,SetSuspendState", "0,1,0"]
+                        )
+                    else:
+                        subprocess.run(["systemctl", "suspend"])
 
             time.sleep(3)
     except KeyboardInterrupt:

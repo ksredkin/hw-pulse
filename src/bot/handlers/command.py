@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta, timezone
+
 from aiogram import Router
 from aiogram.filters import Command, CommandStart
 from aiogram.types import FSInputFile, Message
@@ -219,5 +221,51 @@ async def shutdown(message: Message, cache: CacheService) -> None:
     commands = await cache.get_commands(message.from_user.id) or []
     await cache.set_commands([*commands, "shutdown"], message.from_user.id)
     await message.answer(
-        "⏳ Команда на выключение успешно отправлена! Устройство завершит работу через пару минут."
+        "🛑 Команда выключения отправлена. ПК будет выключен через 5 секунд."
     )
+
+
+@command_router.message(Command("restart"), flags={"need_cache": True})
+async def restart(message: Message, cache: CacheService) -> None:
+    if not message or not message.from_user:
+        return
+
+    commands = await cache.get_commands(message.from_user.id) or []
+    await cache.set_commands([*commands, "restart"], message.from_user.id)
+    await message.answer(
+        "🔄 Команда перезагрузки отправлена. Ожидаю отключения демона."
+    )
+
+
+@command_router.message(Command("sleep"), flags={"need_cache": True})
+async def sleep(message: Message, cache: CacheService) -> None:
+    if not message or not message.from_user:
+        return
+
+    commands = await cache.get_commands(message.from_user.id) or []
+    await cache.set_commands([*commands, "sleep"], message.from_user.id)
+    await message.answer("🌙 ПК переводится в спящий режим.")
+
+
+@command_router.message(Command("ping"), flags={"need_cache": True})
+async def ping(message: Message, cache: CacheService) -> None:
+    if not message or not message.from_user:
+        return
+
+    last_seen = await cache.get_system_last_seen(message.from_user.id)
+
+    if not last_seen:
+        await message.answer("🔴 ПК не в сети.")
+        return
+
+    now = datetime.now(timezone.utc)
+    time_since_last_sent = now - last_seen
+
+    if time_since_last_sent > timedelta(seconds=30):
+        await message.answer(
+            f"🟢 ПК онлайн! Последний отклик: {time_since_last_sent.total_seconds()} сек назад."
+        )
+    else:
+        await message.answer(
+            f"🔴 ПК не в сети. Последний отклик: {time_since_last_sent.total_seconds():.1f} мин назад."
+        )
