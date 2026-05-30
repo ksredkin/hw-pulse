@@ -261,11 +261,11 @@ async def ping(message: Message, cache: CacheService) -> None:
     now = datetime.now(timezone.utc)
     time_since_last_sent = now - last_seen
 
-    if time_since_last_sent > timedelta(seconds=30):
+    if time_since_last_sent < timedelta(seconds=30):
         await message.answer(
-            f"🟢 ПК онлайн! Последний отклик: {time_since_last_sent.total_seconds()} сек назад."
+            f"🟢 ПК онлайн! Последний отклик: {time_since_last_sent.total_seconds():.1f} сек назад."
         )
     else:
         await message.answer(
-            f"🔴 ПК не в сети. Последний отклик: {time_since_last_sent.total_seconds():.1f} мин назад."
+            f"🔴 ПК не в сети. Последний отклик: {(time_since_last_sent.total_seconds()/60):.1f} мин назад."
         )
