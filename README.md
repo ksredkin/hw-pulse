@@ -5,6 +5,7 @@
 ![Aiogram](https://img.shields.io/badge/Aiogram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
 ![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white)
+![Sentry](https://img.shields.io/badge/Sentry-362D59?style=for-the-badge&logo=sentry&logoColor=white)
 ![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-D71F00?style=for-the-badge&logo=sqlalchemy&logoColor=white)
 ![Alembic](https://img.shields.io/badge/Alembic-00A98F?style=for-the-badge&logo=alembic&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
@@ -21,29 +22,30 @@
 
 ## 📊 Статистика и качество
 
-🧪 Покрытие кода тестами: **46%**
+🧪 Покрытие кода тестами: **48%**
 
 🛠 **Качество кода:** проект проходит строгую проверку **Ruff** (линтинг/форматирование) и **Mypy** (статическая типизация)
 
 🔄 **CI/CD:** Автоматическое тестирование и проверка типов при каждом Push (GitHub Actions)
 
-## 🧠 Компоненты системы
+🪰 **Мониторинг ошибок:** Интегрирован трекинг исключений **Sentry** (с раздельными DSN для API и Бота).
 
-- 🕵️‍♂️ **Daemon (Клиент):** Легковесный скрипт на целевой машине. Собирает метрики (CPU, RAM, диски, сеть, температура) и отправляет их по HTTP.
-- ⚙️ **API (Сервер):** Принимает запросы на FastAPI, валидирует данные через Pydantic и проверяет API-ключи.
-- 🗄️ **БД и Кэш (Сервер):** PostgreSQL для хранения пользователей (миграции Alembic) + Redis для кэширования метрик и сессий авторизации.
-- 🤖 **Telegram Bot (Сервер):** Асинхронный интерфейс на aiogram 3 для управления и вывода статистики.
+## 🧠 Компоненты системы
+- 🕵️‍♂️ **Daemon (Клиент):** Легковесный фоновый фоновый скрипт на целевой машине. Собирает метрики (CPU, RAM, диски, сеть, температура), исполняет системные команды от сервера.
+- ⚙️ **API (Сервер):** Принимает запросы от демонов, валидирует данные через Pydantic, управляет сессиями авторизации и распределяет команды.
+- 🗄️ **БД и Кэш (Сервер):** PostgreSQL для долгосрочного хранения профилей (миграции Alembic) + Redis как высокоскоростной кэш метрик, хранилище локов авторизации и брокер сообщений (Pub/Sub).
+- 🤖 **Telegram Bot (Сервер):** Асинхронный интерфейс на aiogram 3 с интерактивными инлайн-меню, поддержкой FSM для ввода настроек и Throttling Middleware против флуда.
 
 ## 🎯 Возможности
-- 📊 Сбор метрик: нагрузка на ядра CPU, использование RAM и Swap, заполненность дисков, сетевой трафик.
-- 🌡️ Кроссплатформенный мониторинг температуры (включая Linux и Windows WMI).
-- 🔑 Многопользовательский режим: генерация уникальных криптографических API-ключей для клиентов.
-- 🛡️ Защита API-эндпоинтов зависимостями авторизации (`Depends`).
-- 🔄 Автоматическое применение миграций базы данных при старте серверной части.
+- 📊 **Сбор метрик:** Нагрузка на ядра CPU, использование RAM/Swap, заполненность дисков, сетевой трафик.
+- 🌡️ **Контроль температуры:** Кроссплатформенный мониторинг нагрева процессора (включая Linux и Windows WMI).
+- 🚨 **Мгновенные алерты:** Уведомления в Telegram при превышении заданного порога температуры на базе Redis Pub/Sub с умной блокировкой (Cooldown) от спама.
+- 🎮 **Двустороннее управление (Remote Control):** Безопасная отправка системных команд (выключение, перезагрузка, сон) из чата бота на ПК по паттерну *Read-and-Delete*.
+- 🔑 **Безопасность:** Генерация уникальных криптографических API-ключей для клиентов, защита эндпоинтов через FastAPI `Depends`.
 
 ## 📋 Требования
 
-- 🔌 **Клиент:** Python 3.14+ (для работы демона), Libre Hardware Monitor (для Windows)
+- 🔌 **Клиент:** Python 3.14+, Libre Hardware Monitor (только для ОС Windows)
 - 🎛️ **Сервер:** Docker & Docker Compose, Telegram Bot Token (от [@BotFather](https://t.me/BotFather))
 
 ## ⚙️ Переменные окружения (`.env`)
@@ -58,11 +60,13 @@ DAEMON_API_KEY="ваш_сгенерированный_ключ"
 # API
 API_HOST="0.0.0.0"
 API_PORT=8000
+API_SENTRY_DSN=
 
 # Telegram bot
 BOT_TOKEN="your_telegram_bot_token"
 BOT_PROXY=
 BOT_VLESS_PROXY=
+BOT_SENTRY_DSN=
 
 # Postgres
 DB_HOST="hw-pulse-postgres"

@@ -24,6 +24,20 @@ from src.bot.tasks.pubsub_listener import listen_for_alerts
 from src.common.database.connection import sessionmaker
 from src.common.services.cache import cache
 from src.common.utils.logger import Logger
+import sentry_sdk
+from sentry_sdk.integrations.aiohttp import AioHttpIntegration
+from src.bot.middlewares.throttling import ThrottlingMiddleware
+from src.bot.services.throttling import ThrottlingService
+
+bot_sentry_dsn = os.getenv("BOT_SENTRY_DSN")
+
+if bot_sentry_dsn:
+    sentry_sdk.init(
+        dsn=bot_sentry_dsn,
+        integrations=[AioHttpIntegration()],
+        traces_sample_rate=1.0,
+        send_default_pii=True,
+    )
 
 logger = Logger("Bot __main__")
 
@@ -108,12 +122,17 @@ async def main() -> None:
         dp = Dispatcher()
         db_session_middleware = DatabaseSessionMiddleware(sessionmaker)
         cache_middleware = CacheMiddleware(cache)
+        
+        throttling_service = ThrottlingService()
+        throttling_middleware = ThrottlingMiddleware(throttling_service)
 
         dp.message.middleware(db_session_middleware)
         dp.message.middleware(cache_middleware)
+        dp.message.middleware(throttling_middleware)
 
         dp.callback_query.middleware(db_session_middleware)
         dp.callback_query.middleware(cache_middleware)
+        dp.callback_query.middleware(throttling_middleware)
 
         dp.include_router(command_router)
         dp.include_router(callback_router)

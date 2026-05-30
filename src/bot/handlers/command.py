@@ -5,7 +5,7 @@ from aiogram.filters import Command, CommandStart
 from aiogram.types import FSInputFile, Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.bot.core.config import BOT_PHOTO_PATH
+from src.bot.core.config import BOT_PHOTO_PATH, DAEMON_IS_NOT_CONNECTED_AFTER_SECONDS
 from src.bot.keyboard.inline import create_inline_keyboard
 from src.bot.messages.messages import start_message
 from src.bot.services.user import UserService
@@ -77,9 +77,7 @@ async def stats(message: Message, cache: CacheService) -> None:
     metrics = await cache.get_metrics(message.from_user.id)
 
     if not metrics:
-        await message.answer(
-            "<b>🚫 Ошибка:</b> данных еще нет. Попробуйте еще раз позже."
-        )
+        await message.answer("🔴 ПК не в сети.")
         return
 
     text_parts = ["<b>💻 Системные показатели:</b>"]
@@ -149,9 +147,7 @@ async def temperature(message: Message, cache: CacheService) -> None:
     metrics = await cache.get_metrics(message.from_user.id)
 
     if not metrics:
-        await message.answer(
-            "<b>🚫 Ошибка:</b> данных еще нет. Попробуйте еще раз позже."
-        )
+        await message.answer("🔴 ПК не в сети.")
         return
 
     cpu = metrics.get("cpu")
@@ -261,7 +257,7 @@ async def ping(message: Message, cache: CacheService) -> None:
     now = datetime.now(timezone.utc)
     time_since_last_sent = now - last_seen
 
-    if time_since_last_sent < timedelta(seconds=30):
+    if time_since_last_sent < timedelta(seconds=DAEMON_IS_NOT_CONNECTED_AFTER_SECONDS):
         await message.answer(
             f"🟢 ПК онлайн! Последний отклик: {time_since_last_sent.total_seconds():.1f} сек назад."
         )

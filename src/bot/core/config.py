@@ -10,3 +10,4 @@ BOT_BEFORE_START_DESCRIPTION = """<b>💻 Hardware Pulse</b> — твой лич
 BOT_PROFILE_DESCRIPTION = """Бот для удаленного мониторинга и управления ПК/сервером 💻
 Уведомления о перегреве, статистика системы и удаленные команды в один клик."""
 BOT_PHOTO_PATH = "./src/bot/img/bot.png"
+DAEMON_IS_NOT_CONNECTED_AFTER_SECONDS = 30

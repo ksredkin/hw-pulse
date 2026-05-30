@@ -12,6 +12,17 @@ from src.common.database.connection import get_db_session
 from src.common.repositories.user_repository import UserRepository
 from src.common.services.cache import cache
 from src.common.utils.logger import Logger
+import sentry_sdk
+
+api_sentry_dsn = os.getenv("API_SENTRY_DSN")
+
+if api_sentry_dsn:
+    sentry_sdk.init(
+        dsn=api_sentry_dsn,
+        enable_tracing=True,
+        traces_sample_rate=1.0,
+        profiles_sample_rate=1.0,
+    )
 
 logger = Logger("Api")
 app = FastAPI()
