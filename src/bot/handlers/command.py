@@ -263,5 +263,5 @@ async def ping(message: Message, cache: CacheService) -> None:
         )
     else:
         await message.answer(
-            f"🔴 ПК не в сети. Последний отклик: {(time_since_last_sent.total_seconds()/60):.1f} мин назад."
+            f"🔴 ПК не в сети. Последний отклик: {(time_since_last_sent.total_seconds() / 60):.1f} мин назад."
         )

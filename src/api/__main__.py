@@ -1,6 +1,7 @@
 import os
 import sys
 
+import sentry_sdk
 import uvicorn
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Security
 from fastapi.responses import JSONResponse
@@ -12,7 +13,6 @@ from src.common.database.connection import get_db_session
 from src.common.repositories.user_repository import UserRepository
 from src.common.services.cache import cache
 from src.common.utils.logger import Logger
-import sentry_sdk
 
 api_sentry_dsn = os.getenv("API_SENTRY_DSN")
 

@@ -3,9 +3,9 @@ from datetime import datetime, timezone
 
 from redis.asyncio import Redis
 
+from src.bot.core.config import DAEMON_IS_NOT_CONNECTED_AFTER_SECONDS
 from src.common.redis.client import r
 from src.common.utils.logger import Logger
-from src.bot.core.config import DAEMON_IS_NOT_CONNECTED_AFTER_SECONDS
 
 logger = Logger("Cache Serice")
 
@@ -48,7 +48,12 @@ class CacheService:
         ],
         telegram_id: int,
     ) -> None:
-        await self._set(f"system:{telegram_id}", "metrics", json.dumps(metrics), DAEMON_IS_NOT_CONNECTED_AFTER_SECONDS)
+        await self._set(
+            f"system:{telegram_id}",
+            "metrics",
+            json.dumps(metrics),
+            DAEMON_IS_NOT_CONNECTED_AFTER_SECONDS,
+        )
 
     async def get_metrics(
         self, telegram_id: int

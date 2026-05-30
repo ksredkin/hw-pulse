@@ -2,11 +2,13 @@ import asyncio
 import os
 import sys
 
+import sentry_sdk
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram.enums import ParseMode
 from aiogram.types import BotCommand, FSInputFile, InputProfilePhotoStatic
+from sentry_sdk.integrations.aiohttp import AioHttpIntegration
 from singbox2proxy import SingBoxProxy
 
 from src.bot.core.config import (
@@ -20,14 +22,12 @@ from src.bot.handlers.command import command_router
 from src.bot.handlers.message import message_router
 from src.bot.middlewares.cache import CacheMiddleware
 from src.bot.middlewares.db import DatabaseSessionMiddleware
+from src.bot.middlewares.throttling import ThrottlingMiddleware
+from src.bot.services.throttling import ThrottlingService
 from src.bot.tasks.pubsub_listener import listen_for_alerts
 from src.common.database.connection import sessionmaker
 from src.common.services.cache import cache
 from src.common.utils.logger import Logger
-import sentry_sdk
-from sentry_sdk.integrations.aiohttp import AioHttpIntegration
-from src.bot.middlewares.throttling import ThrottlingMiddleware
-from src.bot.services.throttling import ThrottlingService
 
 bot_sentry_dsn = os.getenv("BOT_SENTRY_DSN")
 
@@ -122,7 +122,7 @@ async def main() -> None:
         dp = Dispatcher()
         db_session_middleware = DatabaseSessionMiddleware(sessionmaker)
         cache_middleware = CacheMiddleware(cache)
-        
+
         throttling_service = ThrottlingService()
         throttling_middleware = ThrottlingMiddleware(throttling_service)
 
