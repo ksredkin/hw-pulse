@@ -36,6 +36,7 @@ services:
       API_PORT: ${API_PORT}
       REDIS_HOST: hw-pulse-redis
       REDIS_PORT: 6379
+      API_SENTRY_DSN: ${API_SENTRY_DSN} 
     env_file:
       - .env
     depends_on:
@@ -69,6 +70,7 @@ services:
       REDIS_HOST: hw-pulse-redis
       REDIS_PORT: 6379
       BOT_TOKEN: ${BOT_TOKEN}
+      BOT_SENTRY_DSN: ${BOT_SENTRY_DSN}
     env_file:
       - .env
     depends_on:

@@ -3,6 +3,12 @@ import os
 os.environ["REDIS_HOST"] = "localhost"
 os.environ["REDIS_PORT"] = "6379"
 
+os.environ["DB_HOST"] = "localhost"
+os.environ["DB_PORT"] = "1234"
+os.environ["DB_USER"] = "postgres"
+os.environ["DB_PASSWORD"] = "123"
+os.environ["DB_NAME"] = "db_name"
+
 from unittest.mock import AsyncMock, patch
 
 import pytest
