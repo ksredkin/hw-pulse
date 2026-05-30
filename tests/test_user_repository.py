@@ -1,12 +1,14 @@
 import pytest
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from src.common.repositories.user_repository import UserRepository
-from sqlalchemy.ext.asyncio import async_sessionmaker
 from src.common.database.models import User
+from src.common.repositories.user_repository import UserRepository
 
 
 @pytest.mark.asyncio
-async def test_create_and_get_user(sessionmaker: async_sessionmaker) -> None:
+async def test_create_and_get_user(
+    sessionmaker: async_sessionmaker[AsyncSession],
+) -> None:
     async with sessionmaker() as session:
         repository = UserRepository(session)
 
@@ -36,7 +38,9 @@ async def test_create_and_get_user(sessionmaker: async_sessionmaker) -> None:
 
 
 @pytest.mark.asyncio
-async def test_update_user_settings(sessionmaker: async_sessionmaker) -> None:
+async def test_update_user_settings(
+    sessionmaker: async_sessionmaker[AsyncSession],
+) -> None:
     async with sessionmaker() as session:
         repository = UserRepository(session)
 
@@ -52,9 +56,12 @@ async def test_update_user_settings(sessionmaker: async_sessionmaker) -> None:
         assert isinstance(created_user, User)
         assert created_user.telegram_id == telegram_id
         assert created_user.api_key == api_key
-        
-        await repository.update_settings_by_tg_id(telegram_id, new_alert_enabled, new_alert_temp)
+
+        await repository.update_settings_by_tg_id(
+            telegram_id, new_alert_enabled, new_alert_temp
+        )
 
         user_with_new_settings = await repository.get_by_tg_id(telegram_id)
+        assert user_with_new_settings is not None
         assert user_with_new_settings.alert_enabled == new_alert_enabled
         assert user_with_new_settings.alert_temp == new_alert_temp

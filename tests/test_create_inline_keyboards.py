@@ -1,5 +1,10 @@
-from src.bot.keyboard.inline import create_inline_keyboard, create_cancell_inline_keyboard
 from aiogram.types import InlineKeyboardMarkup
+
+from src.bot.keyboard.inline import (
+    create_cancell_inline_keyboard,
+    create_inline_keyboard,
+)
+
 
 def test_create_inline_keyboards() -> None:
     buttons = {"1": "2", "3": "4"}

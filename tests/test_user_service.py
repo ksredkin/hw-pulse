@@ -1,13 +1,15 @@
 import pytest
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from src.common.repositories.user_repository import UserRepository
 from src.bot.services.user import UserService
-from sqlalchemy.ext.asyncio import async_sessionmaker
 from src.common.database.models import User
+from src.common.repositories.user_repository import UserRepository
 
 
 @pytest.mark.asyncio
-async def test_create_and_get_user(sessionmaker: async_sessionmaker) -> None:
+async def test_create_and_get_user(
+    sessionmaker: async_sessionmaker[AsyncSession],
+) -> None:
     async with sessionmaker() as session:
         repository = UserRepository(session)
         service = UserService(repository)

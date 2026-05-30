@@ -11,12 +11,6 @@ from aiogram.types import BotCommand, FSInputFile, InputProfilePhotoStatic
 from sentry_sdk.integrations.aiohttp import AioHttpIntegration
 from singbox2proxy import SingBoxProxy
 
-from src.common.core.config import (
-    BOT_BEFORE_START_DESCRIPTION,
-    BOT_NAME,
-    BOT_PHOTO_PATH,
-    BOT_PROFILE_DESCRIPTION,
-)
 from src.bot.handlers.callback import callback_router
 from src.bot.handlers.command import command_router
 from src.bot.handlers.message import message_router
@@ -25,6 +19,12 @@ from src.bot.middlewares.db import DatabaseSessionMiddleware
 from src.bot.middlewares.throttling import ThrottlingMiddleware
 from src.bot.services.throttling import ThrottlingService
 from src.bot.tasks.pubsub_listener import listen_for_alerts
+from src.common.core.config import (
+    BOT_BEFORE_START_DESCRIPTION,
+    BOT_NAME,
+    BOT_PHOTO_PATH,
+    BOT_PROFILE_DESCRIPTION,
+)
 from src.common.database.connection import sessionmaker
 from src.common.services.cache import cache
 from src.common.utils.logger import Logger
