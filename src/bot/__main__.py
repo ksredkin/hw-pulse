@@ -31,6 +31,7 @@ bot_commands = [
     BotCommand(command="start", description="👋 Стартовое сообщение"),
     BotCommand(command="stats", description="📊 Текущие показатели системы"),
     BotCommand(command="temperature", description="🌡️ Текущая температура процессора"),
+    BotCommand(command="shutdown", description="🔌 Выключить устройство"),
     BotCommand(command="connect", description="💻 Подключить устройство"),
     BotCommand(command="settings", description="⚙️ Настройки"),
 ]

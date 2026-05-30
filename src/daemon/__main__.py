@@ -29,6 +29,7 @@ def main() -> None:
 
     collector = SystemCollector()
     sender = MetricsSender(api_host=api_host, api_key=api_key)
+    current_os = platform.system()
 
     logger.info("Daemon started successfully.")
 
@@ -40,7 +41,6 @@ def main() -> None:
             for command in commands:
                 if command == "shutdown":
                     print("Shutting down... ")
-                    current_os = platform.system()
                     if current_os == "Windows":
                         subprocess.run(["shutdown", "/s", "/t", "5"])
                     else:
