@@ -11,7 +11,7 @@ from aiogram.types import BotCommand, FSInputFile, InputProfilePhotoStatic
 from sentry_sdk.integrations.aiohttp import AioHttpIntegration
 from singbox2proxy import SingBoxProxy
 
-from src.bot.core.config import (
+from src.common.core.config import (
     BOT_BEFORE_START_DESCRIPTION,
     BOT_NAME,
     BOT_PHOTO_PATH,

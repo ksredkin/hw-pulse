@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 
 from redis.asyncio import Redis
 
-from src.bot.core.config import DAEMON_IS_NOT_CONNECTED_AFTER_SECONDS
+from src.common.core.config import DAEMON_IS_NOT_CONNECTED_AFTER_SECONDS
 from src.common.redis.client import r
 from src.common.utils.logger import Logger
 

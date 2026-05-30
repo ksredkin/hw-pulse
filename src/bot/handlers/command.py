@@ -5,7 +5,7 @@ from aiogram.filters import Command, CommandStart
 from aiogram.types import FSInputFile, Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.bot.core.config import BOT_PHOTO_PATH, DAEMON_IS_NOT_CONNECTED_AFTER_SECONDS
+from src.common.core.config import BOT_PHOTO_PATH, DAEMON_IS_NOT_CONNECTED_AFTER_SECONDS
 from src.bot.keyboard.inline import create_inline_keyboard
 from src.bot.messages.messages import start_message
 from src.bot.services.user import UserService
